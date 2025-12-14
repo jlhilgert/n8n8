@@ -835,8 +835,6 @@ describe('OauthService', () => {
 				name: 'Test Credential',
 				type: 'googleOAuth2Api',
 				data: 'encrypted-data',
-				isResolvable: true,
-				resolverId: 'resolver-id',
 			});
 			const oauthTokenData = {
 				access_token: 'access-token',
@@ -860,7 +858,6 @@ describe('OauthService', () => {
 					name: 'Test Credential',
 					type: 'googleOAuth2Api',
 					isResolvable: true,
-					resolverId: 'resolver-id',
 				},
 				oauthTokenData,
 				{ version: 1, identity: authToken },

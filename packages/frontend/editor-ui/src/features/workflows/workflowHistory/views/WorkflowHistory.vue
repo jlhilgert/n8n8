@@ -266,6 +266,10 @@ const restoreWorkflowVersion = async (
 		deactivateAndRestore,
 	);
 
+	if (workflowId.value === workflowsStore.workflowId && activeWorkflow.value.checksum) {
+		workflowsStore.setWorkflowChecksum(activeWorkflow.value.checksum);
+	}
+
 	const history = await workflowHistoryStore.getWorkflowHistory(workflowId.value, {
 		take: 1,
 	});

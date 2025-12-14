@@ -156,7 +156,7 @@ export function createPage({
 							}
 						},
 						allowFileUploads: ${sanitizedAllowFileUploads},
-						allowedFilesMimeTypes: ${JSON.stringify(sanitizedAllowedFilesMimeTypes)},
+						allowedFilesMimeTypes: '${sanitizedAllowedFilesMimeTypes}',
 						i18n: {
 							${Object.keys(sanitizedI18nConfig).length ? `en: ${JSON.stringify(sanitizedI18nConfig)},` : ''}
 						},

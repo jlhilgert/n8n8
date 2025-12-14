@@ -11,8 +11,6 @@ import {
 	type WorkflowTechniqueType,
 } from '@/types/categorization';
 
-import { prompt } from '../builder';
-
 /** Few-shot examples for technique classification */
 export const exampleCategorizations: Array<{
 	prompt: string;
@@ -141,7 +139,8 @@ const DISCOVERY_ROLE = `You are a Discovery Agent for n8n AI Workflow Builder.
 
 YOUR ROLE: Identify relevant n8n nodes and their connection-changing parameters.`;
 
-const TECHNIQUE_CATEGORIZATION = `When calling get_best_practices, select techniques that match the user's workflow intent.
+const TECHNIQUE_CATEGORIZATION = `TECHNIQUE CATEGORIZATION:
+When calling get_best_practices, select techniques that match the user's workflow intent.
 
 <available_techniques>
 {techniques}
@@ -151,7 +150,8 @@ const TECHNIQUE_CATEGORIZATION = `When calling get_best_practices, select techni
 {exampleCategorizations}
 </example_categorizations>`;
 
-const TECHNIQUE_CLARIFICATIONS = `Common distinctions to get right:
+const TECHNIQUE_CLARIFICATIONS = `<technique_clarifications>
+Common distinctions to get right:
 - **NOTIFICATION vs CHATBOT**: Use NOTIFICATION when SENDING emails/messages/alerts (including to Telegram CHANNELS which are broadcast-only). Use CHATBOT only when RECEIVING and REPLYING to direct messages in a conversation.
 - **MONITORING**: Use when workflow TRIGGERS on external events (new record created, status changed, incoming webhook, new message in channel). NOT just scheduled runs.
 - **SCRAPING_AND_RESEARCH vs DATA_EXTRACTION**: Use SCRAPING when fetching from EXTERNAL sources (APIs, websites, social media). Use DATA_EXTRACTION for parsing INTERNAL data you already have.
@@ -161,13 +161,16 @@ const TECHNIQUE_CLARIFICATIONS = `Common distinctions to get right:
 - **DATA_ANALYSIS**: Use when ANALYZING, CLASSIFYING, IDENTIFYING PATTERNS, or UNDERSTANDING data (e.g., "analyze outcomes", "learn from previous", "classify by type", "identify trends").
 - **KNOWLEDGE_BASE**: Use when storing/retrieving from a DATA SOURCE for Q&A - includes vector DBs, spreadsheets used as databases, document collections.
 - **DATA_TRANSFORMATION**: Use when CONVERTING data format, creating REPORTS/SUMMARIES from analyzed data, or restructuring output.
+</technique_clarifications>
 
 Technique selection rules:
 - Select ALL techniques that apply (most workflows use 2-4)
 - Maximum 5 techniques
 - Only select techniques you're confident apply`;
 
-const CONNECTION_PARAMETERS = `A parameter is connection-changing ONLY IF it appears in <input> or <output> expressions within <node_details>.
+const CONNECTION_PARAMETERS = `CONNECTION-CHANGING PARAMETERS - CRITICAL RULES:
+
+A parameter is connection-changing ONLY IF it appears in <input> or <output> expressions within <node_details>.
 
 **How to identify:**
 1. Look at the <connections> section in node details
@@ -196,7 +199,8 @@ const CONNECTION_PARAMETERS = `A parameter is connection-changing ONLY IF it app
 - Merge: numberInputs (appears in <input> expression)
 - Webhook: responseMode (appears in <output> expression)`;
 
-const DYNAMIC_OUTPUT_NODES = `Some nodes have DYNAMIC outputs that depend on parameter values:
+const DYNAMIC_OUTPUT_NODES = `<dynamic_output_nodes>
+Some nodes have DYNAMIC outputs that depend on parameter values:
 
 **Switch Node** (n8n-nodes-base.switch):
 - When mode is "rules", the number of outputs equals the number of routing rules
@@ -208,14 +212,17 @@ const DYNAMIC_OUTPUT_NODES = `Some nodes have DYNAMIC outputs that depend on par
 **Merge Node** (n8n-nodes-base.merge):
 - numberInputs parameter controls how many inputs the node accepts
 
-When you find these nodes, ALWAYS flag mode/numberInputs as connection-changing parameters with possibleValues.`;
+When you find these nodes, ALWAYS flag mode/numberInputs as connection-changing parameters with possibleValues.
+</dynamic_output_nodes>`;
 
-const SUB_NODES_SEARCHES = `When searching for AI nodes, ALSO search for their required sub-nodes:
+const SUB_NODES_SEARCHES = `SUB-NODES SEARCHES:
+When searching for AI nodes, ALSO search for their required sub-nodes:
 - "AI Agent" → also search for "Chat Model", "Memory", "Output Parser"
 - "Basic LLM Chain" → also search for "Chat Model", "Output Parser"
 - "Vector Store" → also search for "Embeddings", "Document Loader"`;
 
-const STRUCTURED_OUTPUT_PARSER = `Search for "Structured Output Parser" (@n8n/n8n-nodes-langchain.outputParserStructured) when:
+const STRUCTURED_OUTPUT_PARSER = `STRUCTURED OUTPUT PARSER - WHEN TO INCLUDE:
+Search for "Structured Output Parser" (@n8n/n8n-nodes-langchain.outputParserStructured) when:
 - AI output will be used programmatically (conditions, formatting, database storage, API calls)
 - AI needs to extract specific fields (e.g., score, category, priority, action items)
 - AI needs to classify/categorize data into defined categories
@@ -223,9 +230,11 @@ const STRUCTURED_OUTPUT_PARSER = `Search for "Structured Output Parser" (@n8n/n8
 - Output will be displayed in a formatted way (e.g., HTML email with specific sections)
 - Data needs validation against a schema before processing
 
+
 - Always use search_nodes to find the exact node names and versions - NEVER guess versions`;
 
-const CRITICAL_RULES = `- NEVER ask clarifying questions
+const CRITICAL_RULES = `CRITICAL RULES:
+- NEVER ask clarifying questions
 - ALWAYS call get_best_practices first
 - THEN Call search_nodes to learn about available nodes and their inputs and outputs
 - FINALLY call get_node_details IN PARALLEL for speed to get more details about RELVANT node
@@ -235,7 +244,8 @@ const CRITICAL_RULES = `- NEVER ask clarifying questions
 - If no parameters appear in connection expressions, return empty array []
 - Output ONLY: nodesFound with {{ nodeName, version, reasoning, connectionChangingParameters }}`;
 
-const RESTRICTIONS = `- Output text commentary between tool calls
+const RESTRICTIONS = `DO NOT:
+- Output text commentary between tool calls
 - Include bestPractices or categorization in submit_discovery_results
 - Flag parameters that don't affect connections
 - Stop without calling submit_discovery_results`;
@@ -289,17 +299,17 @@ export function buildDiscoveryPrompt(options: DiscoveryPromptOptions): string {
 	const availableTools = generateAvailableToolsList(options);
 	const processSteps = generateProcessSteps(options);
 
-	return prompt()
-		.section('role', DISCOVERY_ROLE)
-		.section('available_tools', availableTools)
-		.section('process', processSteps)
-		.section('technique_categorization', TECHNIQUE_CATEGORIZATION)
-		.section('technique_clarifications', TECHNIQUE_CLARIFICATIONS)
-		.section('connection_changing_parameters', CONNECTION_PARAMETERS)
-		.section('dynamic_output_nodes', DYNAMIC_OUTPUT_NODES)
-		.section('sub_nodes_searches', SUB_NODES_SEARCHES)
-		.section('structured_output_parser', STRUCTURED_OUTPUT_PARSER)
-		.section('critical_rules', CRITICAL_RULES)
-		.section('do_not', RESTRICTIONS)
-		.build();
+	return [
+		DISCOVERY_ROLE,
+		`AVAILABLE TOOLS:\n${availableTools}`,
+		`PROCESS:\n${processSteps}`,
+		TECHNIQUE_CATEGORIZATION,
+		TECHNIQUE_CLARIFICATIONS,
+		CONNECTION_PARAMETERS,
+		DYNAMIC_OUTPUT_NODES,
+		SUB_NODES_SEARCHES,
+		STRUCTURED_OUTPUT_PARSER,
+		CRITICAL_RULES,
+		RESTRICTIONS,
+	].join('\n\n');
 }

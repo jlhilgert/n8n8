@@ -230,7 +230,10 @@
 					} catch (e) {}
 
 					if (json?.redirectURL) {
-							window.location.replace(json.redirectURL);
+							const url = json.redirectURL.includes("://")
+									? json.redirectURL
+									: "https://" + json.redirectURL;
+							window.location.replace(url);
 					}
 			})
 			.catch(function (error) {

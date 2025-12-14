@@ -4,8 +4,7 @@ import { Request, Response } from 'express';
 import { EnterpriseCredentialsService } from '@/credentials/credentials.service.ee';
 import { NotFoundError } from '@/errors/response-errors/not-found.error';
 import { BadRequestError } from '@/errors/response-errors/bad-request.error';
-import { CreateCsrfStateData, OauthService } from '@/oauth/oauth.service';
-import { CredentialsEntity } from '@n8n/db';
+import { OauthService } from '@/oauth/oauth.service';
 
 @RestController('/credentials')
 export class DynamicCredentialsController {
@@ -26,22 +25,20 @@ export class DynamicCredentialsController {
 			throw new BadRequestError('Credential type not supported');
 		}
 
-		const callerData: [CredentialsEntity, CreateCsrfStateData] = [
-			credential,
-			{
+		if (credential.type.includes('OAuth2')) {
+			return await this.oauthService.generateAOauth2AuthUri(credential, {
 				cid: credential.id,
 				origin: 'dynamic-credential',
 				authorizationHeader: req.headers.authorization ?? '',
-				credentialResolverId: req.query.resolverId,
-			},
-		];
-
-		if (credential.type.includes('OAuth2')) {
-			return await this.oauthService.generateAOauth2AuthUri(...callerData);
+			});
 		}
 
 		if (credential.type.includes('OAuth1')) {
-			return await this.oauthService.generateAOauth1AuthUri(...callerData);
+			return await this.oauthService.generateAOauth1AuthUri(credential, {
+				cid: credential.id,
+				origin: 'dynamic-credential',
+				authorizationHeader: req.headers.authorization ?? '',
+			});
 		}
 
 		throw new BadRequestError('Credential type not supported');

@@ -2,14 +2,21 @@ import { createTestingPinia } from '@pinia/testing';
 import { waitFor } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import { createComponentRenderer } from '@/__tests__/render';
-import { mockedStore, type MockedStore } from '@/__tests__/utils';
+import { mockedStore } from '@/__tests__/utils';
 import { useRootStore } from '@n8n/stores/useRootStore';
-import { useMCPStore } from '@/features/ai/mcpAccess/mcp.store';
 import McpConnectPopover from './McpConnectPopover.vue';
 
 vi.mock('@/app/composables/useTelemetry', () => ({
 	useTelemetry: () => ({
 		track: vi.fn(),
+	}),
+}));
+
+const mockResetCurrentUserMCPKey = vi.fn();
+
+vi.mock('@/features/ai/mcpAccess/mcp.store', () => ({
+	useMCPStore: () => ({
+		resetCurrentUserMCPKey: mockResetCurrentUserMCPKey,
 	}),
 }));
 
@@ -29,23 +36,17 @@ vi.mock('./MCPAccessTokenPopoverTab.vue', () => ({
 	},
 }));
 
-let pinia: ReturnType<typeof createTestingPinia>;
 let rootStore: ReturnType<typeof mockedStore<typeof useRootStore>>;
-let mcpStore: MockedStore<typeof useMCPStore>;
 let renderComponent: ReturnType<typeof createComponentRenderer>;
 
 describe('McpConnectPopover', () => {
 	beforeEach(() => {
-		pinia = createTestingPinia({ stubActions: false });
-
 		renderComponent = createComponentRenderer(McpConnectPopover, {
-			pinia,
+			pinia: createTestingPinia(),
 		});
 
 		rootStore = mockedStore(useRootStore);
 		rootStore.urlBaseEditor = 'http://localhost:5678/';
-
-		mcpStore = mockedStore(useMCPStore);
 	});
 
 	afterEach(() => {
@@ -105,7 +106,7 @@ describe('McpConnectPopover', () => {
 			await user.keyboard('{Escape}');
 
 			await waitFor(() => {
-				expect(mcpStore.resetCurrentUserMCPKey).toHaveBeenCalled();
+				expect(mockResetCurrentUserMCPKey).toHaveBeenCalled();
 			});
 		});
 	});

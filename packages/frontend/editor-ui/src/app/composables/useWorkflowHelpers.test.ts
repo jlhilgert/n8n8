@@ -263,7 +263,7 @@ describe('useWorkflowHelpers', () => {
 				timezone: 'DEFAULT',
 			});
 			expect(setWorkflowPinDataSpy).toHaveBeenCalledWith({});
-			expect(setWorkflowVersionIdSpy).toHaveBeenCalledWith('v1', 'checksum');
+			expect(setWorkflowVersionIdSpy).toHaveBeenCalledWith('v1');
 			expect(setWorkflowMetadataSpy).toHaveBeenCalledWith({});
 			expect(setWorkflowScopesSpy).toHaveBeenCalledWith(['workflow:create']);
 			expect(setUsedCredentialsSpy).toHaveBeenCalledWith([]);

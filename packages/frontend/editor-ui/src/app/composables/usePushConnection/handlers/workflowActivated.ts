@@ -2,10 +2,13 @@ import type { WorkflowActivated } from '@n8n/api-types/push/workflow';
 import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useBannersStore } from '@/features/shared/banners/banners.store';
 import { useUIStore } from '@/app/stores/ui.store';
+import { getWorkflowVersion } from '@n8n/rest-api-client';
+import { useRootStore } from '@n8n/stores/useRootStore';
 
 export async function workflowActivated({ data }: WorkflowActivated) {
 	const workflowsStore = useWorkflowsStore();
 	const bannersStore = useBannersStore();
+	const rootStore = useRootStore();
 	const uiStore = useUIStore();
 
 	const { workflowId, activeVersionId } = data;
@@ -13,13 +16,17 @@ export async function workflowActivated({ data }: WorkflowActivated) {
 	const workflowIsBeingViewed = workflowsStore.workflowId === workflowId;
 	const activeVersionIsSet = workflowsStore.workflow.activeVersionId !== activeVersionId;
 	if (workflowIsBeingViewed && activeVersionIsSet) {
-		// Only update workflow if there are no unsaved changes
+		const activeVersion = await getWorkflowVersion(
+			rootStore.restApiContext,
+			workflowId,
+			activeVersionId,
+		);
+
+		workflowsStore.setWorkflowActive(workflowId, activeVersion, false);
+
+		// Only update checksum if there are no unsaved changes
 		if (!uiStore.stateIsDirty) {
-			const updatedWorkflow = await workflowsStore.fetchWorkflow(workflowId);
-			if (!updatedWorkflow.checksum) {
-				throw new Error('Failed to fetch workflow');
-			}
-			workflowsStore.setWorkflow(updatedWorkflow);
+			await workflowsStore.updateWorkflowChecksum();
 		}
 	}
 

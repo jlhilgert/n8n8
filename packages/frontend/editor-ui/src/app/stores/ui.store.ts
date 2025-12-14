@@ -263,7 +263,8 @@ export const useUIStore = defineStore(STORES.UI, () => {
 	});
 
 	const modalStack = ref<string[]>([]);
-	const sidebarMenuCollapsed = useLocalStorage<boolean>('sidebar.collapsed', true);
+	const sidebarMenuCollapsedPreference = useLocalStorage<boolean>('sidebar.collapsed', true);
+	const sidebarMenuCollapsed = ref<boolean>(sidebarMenuCollapsedPreference.value);
 	const currentView = ref<string>('');
 	const stateIsDirty = ref<boolean>(false);
 	const lastSelectedNode = ref<string | null>(null);
@@ -569,7 +570,9 @@ export const useUIStore = defineStore(STORES.UI, () => {
 	};
 
 	const toggleSidebarMenuCollapse = () => {
-		sidebarMenuCollapsed.value = !sidebarMenuCollapsed.value;
+		const newCollapsedState = !sidebarMenuCollapsed.value;
+		sidebarMenuCollapsedPreference.value = newCollapsedState;
+		sidebarMenuCollapsed.value = newCollapsedState;
 	};
 
 	const setNotificationsForView = (view: VIEWS, notifications: NotificationOptions[]) => {
@@ -677,6 +680,7 @@ export const useUIStore = defineStore(STORES.UI, () => {
 		nodeViewInitialized,
 		addFirstStepOnLoad,
 		sidebarMenuCollapsed,
+		sidebarMenuCollapsedPreference,
 		theme: computed(() => theme.value),
 		modalsById,
 		currentView,

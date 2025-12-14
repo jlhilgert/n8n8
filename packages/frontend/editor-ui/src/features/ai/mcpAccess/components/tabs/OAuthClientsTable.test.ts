@@ -1,6 +1,5 @@
 import { within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
-import { createTestingPinia } from '@pinia/testing';
 import { createComponentRenderer } from '@/__tests__/render';
 import OAuthClientsTable from '@/features/ai/mcpAccess/components/tabs/OAuthClientsTable.vue';
 import type { OAuthClientResponseDto } from '@n8n/api-types';
@@ -13,15 +12,7 @@ vi.mock('@/app/components/TimeAgo.vue', () => ({
 	},
 }));
 
-vi.mock('@/features/ai/mcpAccess/mcp.store', () => ({
-	useMCPStore: () => ({
-		openConnectPopover: vi.fn(),
-	}),
-}));
-
-const createComponent = createComponentRenderer(OAuthClientsTable, {
-	pinia: createTestingPinia(),
-});
+const createComponent = createComponentRenderer(OAuthClientsTable);
 
 const createClient = (overrides: Partial<OAuthClientResponseDto> = {}): OAuthClientResponseDto => ({
 	id: 'client-1',

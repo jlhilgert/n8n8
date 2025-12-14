@@ -847,8 +847,9 @@ export function useWorkflowHelpers() {
 		}
 
 		const workflow = await workflowsStore.updateWorkflow(workflowId, data);
-		if (!workflow.checksum) {
-			throw new Error('Failed to update workflow');
+		workflowsStore.setWorkflowVersionId(workflow.versionId);
+		if (workflow.checksum) {
+			workflowsStore.setWorkflowChecksum(workflow.checksum);
 		}
 
 		if (isCurrentWorkflow) {
@@ -952,7 +953,10 @@ export function useWorkflowHelpers() {
 		});
 		workflowState.setWorkflowSettings(workflowData.settings ?? {});
 		workflowsStore.setWorkflowPinData(workflowData.pinData ?? {});
-		workflowsStore.setWorkflowVersionId(workflowData.versionId, workflowData.checksum);
+		workflowsStore.setWorkflowVersionId(workflowData.versionId);
+		if (workflowData.checksum) {
+			workflowsStore.setWorkflowChecksum(workflowData.checksum);
+		}
 		workflowsStore.setWorkflowMetadata(workflowData.meta);
 		workflowsStore.setWorkflowScopes(workflowData.scopes);
 

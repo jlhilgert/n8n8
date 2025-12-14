@@ -92,7 +92,6 @@ describe('Form Node', () => {
 		it('should render form for GET request', async () => {
 			const mockResponseObject = {
 				render: jest.fn(),
-				setHeader: jest.fn(),
 			};
 			mockWebhookFunctions.getResponseObject.mockReturnValue(
 				mockResponseObject as unknown as Response,
@@ -233,11 +232,10 @@ describe('Form Node', () => {
 						appendAttribution: 'test',
 						formTitle: 'test',
 						message: 'Test Message',
-						redirectUrl: undefined,
+						redirectUrl: '',
 						title: 'Test Title',
 						responseBinary: encodeURIComponent(JSON.stringify('')),
 						responseText: '',
-						dangerousCustomCss: undefined,
 					},
 				},
 				{
@@ -248,11 +246,10 @@ describe('Form Node', () => {
 						appendAttribution: 'test',
 						formTitle: 'test',
 						message: 'Test Message',
-						redirectUrl: undefined,
+						redirectUrl: '',
 						title: 'Test Title',
 						responseText: '<div>hey</div><script>alert("hi")</script>',
 						responseBinary: encodeURIComponent(JSON.stringify('')),
-						dangerousCustomCss: undefined,
 					},
 				},
 				{
@@ -263,11 +260,10 @@ describe('Form Node', () => {
 						appendAttribution: 'test',
 						formTitle: 'test',
 						message: 'Test Message',
-						redirectUrl: undefined,
+						redirectUrl: '',
 						responseBinary: encodeURIComponent(JSON.stringify('')),
 						title: 'Test Title',
 						responseText: 'my text over here',
-						dangerousCustomCss: undefined,
 					},
 				},
 			];
@@ -319,7 +315,6 @@ describe('Form Node', () => {
 		it('should pass customCss to form template', async () => {
 			const mockResponseObject = {
 				render: jest.fn(),
-				setHeader: jest.fn(),
 			};
 			mockWebhookFunctions.getResponseObject.mockReturnValue(
 				mockResponseObject as unknown as Response,
@@ -365,8 +360,6 @@ describe('Form Node', () => {
 				if (paramName === 'respondWith') return 'text';
 				if (paramName === 'completionTitle') return 'Completion Title';
 				if (paramName === 'completionMessage') return 'Completion Message';
-				if (paramName === 'redirectUrl') return '';
-				if (paramName === 'responseText') return '';
 				if (paramName === 'options')
 					return {
 						customCss: '.completion-container { color: blue; }',
