@@ -109,13 +109,9 @@ export class WorkflowsController {
 			);
 
 			// @ts-expect-error: We shouldn't accept this
-			delete req.body.activeVersionId;
-			// @ts-expect-error: We shouldn't accept this
-			delete req.body.activeVersion;
+			req.body.activeVersionId = undefined;
 			req.body.active = false;
 		}
-
-		const { autosaved = false } = req.body;
 
 		const newWorkflow = new WorkflowEntity();
 
@@ -212,9 +208,14 @@ export class WorkflowsController {
 				req.user,
 				workflow,
 				workflow.id,
-				autosaved,
 				transactionManager,
 			);
+
+			const shouldActivate = req.body.active === true;
+			if (shouldActivate) {
+				workflow.activeVersionId = workflow.versionId;
+				await transactionManager.save(workflow);
+			}
 
 			return await this.workflowFinderService.findWorkflowForUser(
 				workflow.id,
@@ -428,8 +429,7 @@ export class WorkflowsController {
 		const forceSave = req.query.forceSave === 'true';
 
 		let updateData = new WorkflowEntity();
-		const { tags, parentFolderId, aiBuilderAssisted, expectedChecksum, autosaved, ...rest } =
-			req.body;
+		const { tags, parentFolderId, aiBuilderAssisted, expectedChecksum, ...rest } = req.body;
 
 		// TODO: Add zod validation for entire `rest` object before assigning to `updateData`
 		if (
@@ -456,7 +456,6 @@ export class WorkflowsController {
 			forceSave: isSharingEnabled ? forceSave : true,
 			expectedChecksum,
 			aiBuilderAssisted,
-			autosaved,
 		});
 
 		const scopes = await this.workflowService.getWorkflowScopes(req.user, workflowId);

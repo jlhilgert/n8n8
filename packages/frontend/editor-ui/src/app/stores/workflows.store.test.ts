@@ -908,7 +908,7 @@ describe('useWorkflowsStore', () => {
 				workflowPublishHistory: [],
 			};
 
-			workflowsStore.setWorkflowActive('1', mockActiveVersion, true);
+			workflowsStore.setWorkflowActive('1', mockActiveVersion);
 
 			expect(workflowsStore.activeWorkflows).toContain('1');
 			expect(workflowsStore.workflowsById['1'].active).toBe(true);
@@ -931,7 +931,7 @@ describe('useWorkflowsStore', () => {
 				workflowPublishHistory: [],
 			};
 
-			workflowsStore.setWorkflowActive('1', mockActiveVersion, true);
+			workflowsStore.setWorkflowActive('1', mockActiveVersion);
 
 			expect(workflowsStore.activeWorkflows).toEqual(['1']);
 			expect(workflowsStore.workflowsById['1'].active).toBe(true);
@@ -953,7 +953,7 @@ describe('useWorkflowsStore', () => {
 				workflowPublishHistory: [],
 			};
 
-			workflowsStore.setWorkflowActive('2', mockActiveVersion, true);
+			workflowsStore.setWorkflowActive('2', mockActiveVersion);
 			expect(workflowsStore.workflowsById['1'].active).toBe(false);
 			expect(uiStore.stateIsDirty).toBe(true);
 		});
@@ -1490,7 +1490,6 @@ describe('useWorkflowsStore', () => {
 				.spyOn(apiUtils, 'makeRestApiRequest')
 				.mockImplementation(async () => ({
 					versionId: updatedVersionId,
-					checksum: 'checksum',
 				}));
 
 			await workflowsStore.archiveWorkflow(workflowId);
@@ -1530,7 +1529,6 @@ describe('useWorkflowsStore', () => {
 				.spyOn(apiUtils, 'makeRestApiRequest')
 				.mockImplementation(async () => ({
 					versionId: updatedVersionId,
-					checksum: 'checksum',
 				}));
 
 			await workflowsStore.unarchiveWorkflow(workflowId);
@@ -1568,7 +1566,7 @@ describe('useWorkflowsStore', () => {
 			const makeRestApiRequestSpy = vi.spyOn(apiUtils, 'makeRestApiRequest').mockResolvedValue(
 				createTestWorkflow({
 					id: 'w1',
-					versionId: 'v1',
+					versionId: 'v2',
 					settings: {
 						executionOrder: 'v1',
 						timezone: 'UTC',
@@ -1594,8 +1592,8 @@ describe('useWorkflowsStore', () => {
 			);
 
 			// Assert returned value and store updates
-			expect(result.versionId).toBe('v1');
-			expect(workflowsStore.workflow.versionId).toBe('v1');
+			expect(result.versionId).toBe('v2');
+			expect(workflowsStore.workflow.versionId).toBe('v2');
 			expect(workflowsStore.workflow.settings).toEqual({
 				executionOrder: 'v1',
 				timezone: 'UTC',

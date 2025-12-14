@@ -17,7 +17,6 @@ export class HttpDigestAuth implements ICredentialType {
 			name: 'user',
 			type: 'string',
 			default: '',
-			resolvableField: true,
 		},
 		{
 			displayName: 'Password',
@@ -27,7 +26,6 @@ export class HttpDigestAuth implements ICredentialType {
 				password: true,
 			},
 			default: '',
-			resolvableField: true,
 		},
 	];
 }

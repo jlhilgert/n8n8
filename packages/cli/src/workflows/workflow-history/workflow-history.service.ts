@@ -100,7 +100,6 @@ export class WorkflowHistoryService {
 		user: User | string,
 		workflow: IWorkflowBase,
 		workflowId: string,
-		autosaved = false,
 		transactionManager?: EntityManager,
 	) {
 		if (!workflow.nodes || !workflow.connections) {
@@ -122,7 +121,6 @@ export class WorkflowHistoryService {
 				nodes: workflow.nodes,
 				versionId: workflow.versionId,
 				workflowId,
-				autosaved,
 			});
 		} catch (e) {
 			const error = ensureError(e);

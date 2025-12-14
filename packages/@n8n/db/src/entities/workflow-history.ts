@@ -29,9 +29,6 @@ export class WorkflowHistory extends WithTimestamps {
 	@Column({ type: 'text', nullable: true })
 	description: string | null;
 
-	@Column({ default: false })
-	autosaved: boolean;
-
 	@ManyToOne('WorkflowEntity', {
 		onDelete: 'CASCADE',
 	})

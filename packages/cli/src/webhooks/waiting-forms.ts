@@ -2,7 +2,6 @@ import type { IExecutionResponse } from '@n8n/db';
 import { Service } from '@n8n/di';
 import type express from 'express';
 import type { IRunData } from 'n8n-workflow';
-import { getWebhookSandboxCSP } from 'n8n-core';
 import {
 	FORM_NODE_TYPE,
 	WAIT_NODE_TYPE,
@@ -128,7 +127,6 @@ export class WaitingForms extends WaitingWebhooks {
 			);
 
 			if (!completionPage) {
-				res.setHeader('Content-Security-Policy', getWebhookSandboxCSP());
 				res.render('form-trigger-completion', {
 					title: 'Form Submitted',
 					message: 'Your response has been recorded',

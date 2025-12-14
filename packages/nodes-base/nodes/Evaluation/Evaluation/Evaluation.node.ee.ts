@@ -42,6 +42,9 @@ export class Evaluation implements INodeType {
 		// Pass function explicitly since expression context doesn't allow imports in getInputConnectionTypes
 		inputs: `={{(${getInputConnectionTypes})($parameter, ${metricRequiresModelConnection})}}`,
 		outputs: `={{(${getOutputConnectionTypes})($parameter)}}`,
+		codex: {
+			alias: ['Test', 'Metrics', 'Evals', 'Set Output', 'Set Metrics'],
+		},
 		credentials: [
 			{
 				name: 'googleApi',

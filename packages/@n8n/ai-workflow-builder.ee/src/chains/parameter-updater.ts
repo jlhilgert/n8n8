@@ -4,16 +4,9 @@ import { ChatPromptTemplate, HumanMessagePromptTemplate } from '@langchain/core/
 import type { Logger } from 'n8n-workflow';
 import { z } from 'zod';
 
-import { prompt as createPromptBuilder } from '@/prompts/builder';
 import {
-	getMatchingGuides,
-	getMatchingExamples,
-	hasResourceLocatorParameters,
 	instanceUrlPrompt,
-	CORE_INSTRUCTIONS,
-	EXPRESSION_RULES,
-	COMMON_PATTERNS,
-	OUTPUT_FORMAT,
+	ParameterUpdatePromptBuilder,
 } from '@/prompts/chains/parameter-updater';
 
 import { LLMServiceError } from '../errors';
@@ -78,39 +71,18 @@ export const createParameterUpdaterChain = (
 		});
 	}
 
-	// Build context for registry lookups
-	const context = {
+	// Build dynamic system prompt based on context
+	const systemPromptContent = ParameterUpdatePromptBuilder.buildSystemPrompt({
 		nodeType: options.nodeType,
 		nodeDefinition: options.nodeDefinition,
 		requestedChanges: options.requestedChanges,
-		hasResourceLocatorParams: hasResourceLocatorParameters(options.nodeDefinition),
-	};
-
-	// Get matching guides and examples from registry
-	const guides = getMatchingGuides(context);
-	const examples = getMatchingExamples(context);
-
-	// Build dynamic system prompt using PromptBuilder
-	const builder = createPromptBuilder()
-		.section('core_instructions', CORE_INSTRUCTIONS)
-		.section('expression_rules', EXPRESSION_RULES);
-
-	// Add all matching guides
-	for (const guide of guides) {
-		const sectionId = `guide_${guide.patterns[0].replace(/[^a-zA-Z0-9]/g, '_')}`;
-		builder.section(sectionId, guide.content);
-	}
-
-	// Add common patterns, examples, and output format
-	builder
-		.section('common_patterns', COMMON_PATTERNS)
-		.examplesIf(examples.length > 0, 'examples', examples)
-		.section('output_format', OUTPUT_FORMAT);
-
-	const systemPromptContent = builder.build();
+		hasResourceLocatorParams: ParameterUpdatePromptBuilder.hasResourceLocatorParameters(
+			options.nodeDefinition,
+		),
+	});
 
 	// Log token estimate for monitoring
-	const tokenEstimate = builder.estimateTokens();
+	const tokenEstimate = ParameterUpdatePromptBuilder.estimateTokens(systemPromptContent);
 	logger?.debug(`Parameter updater prompt size: ~${tokenEstimate} tokens`);
 
 	// Cache system prompt and node definition prompt

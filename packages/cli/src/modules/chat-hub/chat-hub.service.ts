@@ -48,7 +48,6 @@ import type { ChatHubSession } from './chat-hub-session.entity';
 import { ChatHubWorkflowService } from './chat-hub-workflow.service';
 import { ChatHubAttachmentService } from './chat-hub.attachment.service';
 import {
-	CHAT_TRIGGER_NODE_MIN_VERSION,
 	EXECUTION_FINISHED_STATUSES,
 	EXECUTION_POLL_INTERVAL,
 	JSONL_STREAM_HEADERS,
@@ -572,7 +571,7 @@ export class ChatHubService {
 
 		const chatTrigger = chatTriggers[0];
 
-		if (chatTrigger.typeVersion < CHAT_TRIGGER_NODE_MIN_VERSION) {
+		if (chatTrigger.typeVersion < 1.4) {
 			throw new BadRequestError(
 				'Chat Trigger node version is too old to support Chat. Please update the node.',
 			);

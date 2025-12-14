@@ -417,8 +417,6 @@ describe('CredentialsHelper', () => {
 			name: 'Test Credentials',
 			type: credentialType,
 			data: cipher.encrypt({ apiKey: 'static-key' }),
-			isResolvable: false,
-			resolvableAllowFallback: false,
 		} as CredentialsEntity;
 
 		beforeEach(() => {
@@ -433,7 +431,6 @@ describe('CredentialsHelper', () => {
 
 			const resolvedData = { apiKey: 'dynamic-key' };
 			mockCredentialResolutionProvider.resolveIfNeeded.mockResolvedValue(resolvedData);
-			credentialsRepository.findOneByOrFail.mockResolvedValue(mockCredentialEntity);
 
 			const result = await credentialsHelper.getDecrypted(
 				mockAdditionalData,
@@ -449,9 +446,6 @@ describe('CredentialsHelper', () => {
 					id: mockCredentialEntity.id,
 					name: mockCredentialEntity.name,
 					isResolvable: false,
-					type: 'testApi',
-					resolverId: undefined,
-					resolvableAllowFallback: false,
 				},
 				{ apiKey: 'static-key' },
 				mockAdditionalData.executionContext,

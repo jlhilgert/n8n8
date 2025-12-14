@@ -41,7 +41,6 @@ import {
 	FORM_TRIGGER_NODE_TYPE,
 	NodeOperationError,
 	OperationalError,
-	tryToParseUrl,
 	UnexpectedError,
 	WAIT_NODE_TYPE,
 	WorkflowConfigurationError,
@@ -235,20 +234,10 @@ export const handleFormRedirectionCase = (
 		(data?.headers as IDataObject)?.location &&
 		String(data?.responseCode).startsWith('3')
 	) {
-		const locationUrl = String((data?.headers as IDataObject)?.location);
-		let validatedUrl: string | undefined;
-		try {
-			validatedUrl = tryToParseUrl(locationUrl);
-		} catch {
-			// Invalid URL, don't redirect
-		}
-
 		data.responseCode = 200;
-		if (validatedUrl) {
-			data.data = {
-				redirectURL: validatedUrl,
-			};
-		}
+		data.data = {
+			redirectURL: (data?.headers as IDataObject)?.location,
+		};
 		(data.headers as IDataObject).location = undefined;
 	}
 

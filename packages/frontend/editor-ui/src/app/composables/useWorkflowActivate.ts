@@ -108,15 +108,15 @@ export function useWorkflowActivate() {
 				workflow = await workflowsApi.deactivateWorkflow(rootStore.restApiContext, currWorkflowId);
 			}
 
-			if (!workflow.checksum) {
-				throw new Error('Failed to activate or deactivate workflow');
-			}
-
 			// Update local state
 			if (workflow.activeVersion) {
-				workflowsStore.setWorkflowActive(currWorkflowId, workflow.activeVersion, true);
+				workflowsStore.setWorkflowActive(currWorkflowId, workflow.activeVersion);
 			} else {
 				workflowsStore.setWorkflowInactive(currWorkflowId);
+			}
+
+			if (isCurrentWorkflow && workflow.checksum) {
+				workflowsStore.setWorkflowChecksum(workflow.checksum);
 			}
 		} catch (error) {
 			const newStateName = newActiveState ? 'activated' : 'deactivated';
@@ -186,14 +186,17 @@ export function useWorkflowActivate() {
 				expectedChecksum,
 			});
 
-			if (!updatedWorkflow.activeVersion || !updatedWorkflow.checksum) {
+			if (!updatedWorkflow.activeVersion) {
 				throw new Error('Failed to publish workflow');
 			}
 
-			workflowsStore.setWorkflowActive(workflowId, updatedWorkflow.activeVersion, true);
+			workflowsStore.setWorkflowActive(workflowId, updatedWorkflow.activeVersion);
 
 			if (workflowId === workflowsStore.workflowId) {
-				workflowsStore.setWorkflowVersionId(updatedWorkflow.versionId, updatedWorkflow.checksum);
+				workflowsStore.setWorkflowVersionId(updatedWorkflow.versionId);
+				if (updatedWorkflow.checksum) {
+					workflowsStore.setWorkflowChecksum(updatedWorkflow.checksum);
+				}
 			}
 
 			void useExternalHooks().run('workflow.published', {
@@ -239,7 +242,11 @@ export function useWorkflowActivate() {
 		void useExternalHooks().run('workflowActivate.updateWorkflowActivation', telemetryPayload);
 
 		try {
-			await workflowsStore.deactivateWorkflow(workflowId);
+			const updatedWorkflow = await workflowsStore.deactivateWorkflow(workflowId);
+
+			if (workflowId === workflowsStore.workflowId && updatedWorkflow.checksum) {
+				workflowsStore.setWorkflowChecksum(updatedWorkflow.checksum);
+			}
 
 			void useExternalHooks().run('workflow.unpublished', {
 				workflowId,

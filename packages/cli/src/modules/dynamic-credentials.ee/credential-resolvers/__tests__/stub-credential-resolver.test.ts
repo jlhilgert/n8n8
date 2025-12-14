@@ -78,13 +78,4 @@ describe('StubCredentialResolver', () => {
 			await expect(resolver2.getSecret(credentialId, context, handle)).rejects.toThrow();
 		});
 	});
-
-	describe('validateIdentity', () => {
-		it('should validate identity', async () => {
-			const resolver = new StubCredentialResolver(mockLogger);
-			const identity = 'test-identity';
-			const handle = testHelpers.createHandle({});
-			await expect(resolver.validateIdentity(identity, handle)).resolves.toBeUndefined();
-		});
-	});
 });

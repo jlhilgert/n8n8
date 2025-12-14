@@ -582,12 +582,14 @@ export class OauthService {
 			id: credential.id,
 			name: credential.name,
 			type: credential.type,
-			isResolvable: credential.isResolvable,
-			resolverId: credentialResolverId,
+			isResolvable: true,
 		};
 
 		await this.dynamicCredentialsProxy.storeIfNeeded(
-			credentialStoreMetadata,
+			{
+				...credentialStoreMetadata,
+				isResolvable: true,
+			},
 			oauthTokenData,
 			//  todo parse this
 			{ version: 1, identity: authHeader },

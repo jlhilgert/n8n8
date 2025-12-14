@@ -21,7 +21,6 @@ export class ZulipApi implements ICredentialType {
 			type: 'string',
 			placeholder: 'name@email.com',
 			default: '',
-			resolvableField: true,
 		},
 		{
 			displayName: 'API Key',
@@ -29,7 +28,6 @@ export class ZulipApi implements ICredentialType {
 			type: 'string',
 			typeOptions: { password: true },
 			default: '',
-			resolvableField: true,
 		},
 	];
 }

@@ -22,7 +22,6 @@ export async function createWorkflowHistoryItem(
 		],
 		versionId: uuid(),
 		workflowPublishHistory: [],
-		autosaved: false,
 		...(data ?? {}),
 		workflowId,
 	});
